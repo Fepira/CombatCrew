@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Mockup - Prototipo Navegable</title>
+    <style>
+        /* Estilo que simula la apariencia de Godot */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .game-window {
+            width: 800px;
+            height: 600px;
+            background: #2b2b2b;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .screen.active {
+            display: flex;
+        }
+        
+        h1 {
+            font-size: 48px;
+            margin-bottom: 40px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+        
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 300px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .character-form {
+            background: rgba(0,0,0,0.3);
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #667eea;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 16px;
+        }
+        
+        input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        select option {
+            background: #2b2b2b;
+        }
+        
+        .character-stats {
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+            width: 600px;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        
+        .stat-label {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .stat-value {
+            color: #38ef7d;
+            font-weight: bold;
+        }
+        
+        .combat-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .combatants {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .fighter-card {
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .hp-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f00, #ff0);
+            width: 70%;
+            transition: width 0.3s ease;
+        }
+        
+        .combat-log {
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 5px;
+            width: 600px;
+            height: 150px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .log-entry {
+            color: #0f0;
+            margin-bottom: 5px;
+        }
+        
+        .nav-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: rgba(255,255,255,0.5);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-window">
+        <!-- Pantalla 1: Menú Principal -->
+        <div class="screen active" id="menu">
+            <h1>⚔️ RPG NOSTÁLGICO ⚔️</h1>
+            <div class="menu-buttons">
+                <button class="btn" onclick="showScreen('character-creation')">Nueva Partida</button>
+                <button class="btn btn-secondary" onclick="showScreen('load-game')">Cargar Partida</button>
+                <button class="btn btn-danger" onclick="alert('Saliendo del juego...')">Salir</button>
+            </div>
+            <div class="nav-hint">Mockup navegable - Haz clic en los botones</div>
+        </div>
+        
+        <!-- Pantalla 2: Creación de Personaje -->
+        <div class="screen" id="character-creation">
+            <h2>Crear Nuevo Personaje</h2>
+            <div class="character-form">
+                <div class="form-group">
+                    <label for="name">Nombre del Héroe:</label>
+                    <input type="text" id="name" placeholder="Ingresa tu nombre..." value="Frodo">
+                </div>
+                <div class="form-group">
+                    <label for="class">Clase:</label>
+                    <select id="class">
+                        <option>Guerrero</option>
+                        <option>Mago</option>
+                        <option>Clérigo</option>
+                        <option>Luchador</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Atributos Iniciales:</label>
+                    <div class="stat-item">
+                        <span class="stat-label">Fuerza:</span>
+                        <span class="stat-value">10</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Agilidad:</span>
+                        <span class="stat-value">5</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Vitalidad:</span>
+                        <span class="stat-value">5</span>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="showScreen('game-menu')">Crear Personaje</button>
+                <button class="btn btn-danger" onclick="showScreen('menu')">Volver</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla 3: Menú del Juego -->
+        <div class="screen" id="game-menu">
+            <h2>Personaje: Frodo (Nivel 1)</h2>
+            <div class="character-stats">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Clase:</span>
+                        <span class="stat-value">Guerrero</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Nivel:</span>
+                        <span class="stat-value">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">HP:</span>
+                        <span class="stat-value">100/100</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Dinero:</span>
+                        <span class="stat-value">100 💰</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Fuerza:</span>
+                        <span class="stat-value">10</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Agilidad:</span>
+                        <span class="stat-value">5</span>
+                    </div>
+                </div>
+            </div>
+            <div class="menu-buttons">
+                <button class="btn" onclick="showScreen('combat')">⚔️ Entrar en Combate</button>
+                <button class="btn btn-success" onclick="alert('Sanando... HP restaurado!')">💚 Sanar (20💰)</button>
+                <button class="btn btn-secondary" onclick="showScreen('history')">📜 Ver Historial</button>
+                <button class="btn btn-danger" onclick="showScreen('menu')">🏠 Menú Principal</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla 4: Combate -->
+        <div class="screen" id="combat">
+            <h2>⚔️ COMBATE ⚔️</h2>
+            <div class="combatants">
+                <div class="fighter-card">
+                    <h3>Frodo</h3>
+                    <p>Guerrero Lvl 1</p>
+                    <div class="hp-bar">
+                        <div class="hp-fill" style="width: 70%"></div>
+                    </div>
+                    <p>HP: 70/100</p>
+                </div>
+                <div style="align-self: center; font-size: 48px;">VS</div>
+                <div class="fighter-card">
+                    <h3>Goblin</h3>
+                    <p>Enemigo Lvl 1</p>
+                    <div class="hp-bar">
+                        <div class="hp-fill" style="width: 40%"></div>
+                    </div>
+                    <p>HP: 40/100</p>
+                </div>
+            </div>
+            <div class="combat-log">
+                <div class="log-entry">> Combate iniciado!</div>
+                <div class="log-entry">> Frodo ataca al Goblin causando 15 de daño</div>
+                <div class="log-entry">> Goblin contraataca causando 10 de daño</div>
+                <div class="log-entry">> Frodo esquiva el siguiente ataque</div>
+                <div class="log-entry">> Esperando siguiente turno...</div>
+            </div>
+            <button class="btn btn-secondary" onclick="showScreen('game-menu')">Continuar (Simulación)</button>
+        </div>
+        
+        <!-- Pantalla 5: Historial -->
+        <div class="screen" id="history">
+            <h2>📜 Historial de Aventuras</h2>
+            <div class="combat-log" style="height: 300px; width: 700px;">
+                <div class="log-entry">> [2024-10-20 10:00] Personaje creado: Frodo, Guerrero Nivel 1</div>
+                <div class="log-entry">> [2024-10-20 10:05] Combate ganado contra Goblin Lvl 1 (+50💰, +1 Nivel)</div>
+                <div class="log-entry">> [2024-10-20 10:10] Sanación realizada (-20💰, +25 HP)</div>
+                <div class="log-entry">> [2024-10-20 10:15] Combate perdido contra Orco Lvl 3 (-50💰)</div>
+                <div class="log-entry">> [2024-10-20 10:20] Subida de nivel: Nivel 2 → Nivel 3</div>
+                <div class="log-entry">> [2024-10-20 10:25] Evolución de clase: Guerrero → Caballero (Luz)</div>
+            </div>
+            <button class="btn" onclick="showScreen('game-menu')">Volver</button>
+        </div>
+        
+        <!-- Pantalla 6: Cargar Partida -->
+        <div class="screen" id="load-game">
+            <h2>Cargar Partida Guardada</h2>
+            <div class="character-form">
+                <div class="form-group">
+                    <label>Partidas Guardadas:</label>
+                    <div class="stat-item" style="cursor: pointer;" onclick="showScreen('game-menu')">
+                        <span class="stat-label">Frodo - Guerrero Lvl 5</span>
+                        <span class="stat-value">20/10/2024</span>
+                    </div>
+                    <div class="stat-item" style="cursor: pointer;" onclick="showScreen('game-menu')">
+                        <span class="stat-label">Gandalf - Mago Lvl 12</span>
+                        <span class="stat-value">19/10/2024</span>
+                    </div>
+                    <div class="stat-item" style="cursor: pointer;" onclick="showScreen('game-menu')">
+                        <span class="stat-label">Aragorn - Luchador Lvl 8</span>
+                        <span class="stat-value">18/10/2024</span>
+                    </div>
+                </div>
+                <button class="btn btn-danger" onclick="showScreen('menu')">Volver</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showScreen(screenId) {
+            // Ocultar todas las pantallas
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Mostrar la pantalla seleccionada
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+        }
+        
+        // Efecto de escritura para el log de combate
+        function typeWriter(element, text, speed = 50) {
+            let i = 0;
+            element.innerHTML = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+    </script>
+</body>
+</html>
